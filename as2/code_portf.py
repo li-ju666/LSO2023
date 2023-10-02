@@ -1,6 +1,4 @@
 import numpy as np
-import scipy.sparse as sps
-import scipy.sparse.linalg as splinalg
 import time
 
 
@@ -36,28 +34,26 @@ dinv = np.asarray(1./d)
 Qinv = np.linalg.inv(Q)
 
 # 1. formulation step:
+dinvF = np.multiply(dinv, F)
+dinvmu = np.multiply(dinv, mu)
 
 # Compuet S and $\tilde{d}$
 s11 = np.array([[dinv.sum()]])
-s12 = np.ones((1, n))@np.multiply(dinv, F)
+s12 = np.ones((1, n))@dinvF
 s21 = s12.T
-s22 = F.T @ np.multiply(dinv, F) + Qinv
+s22 = F.T @ dinvF + Qinv
 
 
 S = -np.vstack((np.hstack((s11, s12)),
                 np.hstack((s21, s22))))
 
 # Compute $\tilde{b}$
-b2 = np.array([1] + [0]*k).reshape(-1, 1)
-tobesub = np.concatenate(
+tilde_b = np.concatenate(
     (
-        np.array([[np.multiply(dinv, mu).sum()]]),
-        F.T@(np.multiply(dinv, mu)),
+        np.array([[1 - dinvmu.sum()]]),
+        -F.T@dinvmu,
     )
 )
-
-tilde_b = b2 - tobesub
-
 
 # 2. solving step:
 
@@ -77,6 +73,6 @@ right_hand_side = b1 - A12@x_2
 
 wfast = np.multiply(dinv, right_hand_side[:n])
 
-print(f"Elapsed time is {(time.time() - t)} seconds.")
+print(f"Time for solving is {(time.time() - t)} seconds.")
 rel_err = np.sqrt(np.sum((wfast-wslow).A1**2)/np.sum(wslow.A1**2))
-print(rel_err)
+print(f"Error: {rel_err}")
