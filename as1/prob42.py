@@ -74,7 +74,6 @@ def steepest_descent_line_search_stepsize(A, x0, epsilon, tmax):
 
 
 def heavy_ball(A, x0, eta, beta, epsilon, tmax):
-    print(f"eta={eta}, beta={beta}")
     x_prev = x0
     x = x0
     t = 0
@@ -164,7 +163,7 @@ print("")  # empty line
 results = one_run(1)
 # plot results with log10 scale
 for key, value in results.items():
-    plt.plot(value, label=key)
+    plt.plot(np.log10(value), label=key)
 
 
 plt.xlabel("Num of iterations")
